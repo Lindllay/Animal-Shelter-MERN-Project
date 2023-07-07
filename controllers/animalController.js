@@ -5,33 +5,37 @@ const { StatusCodes } = require("http-status-codes");
 const cloudinary = require("../lib/cloudinary");
 
 const getAllAnimals = async (req, res) => {
-	const { name, age, weight, breed, gender, adoptedAt, species } = req.query;
-	const queryObject = {};
+	if (!req.query) {
+		queryObject = {};
+	} else {
+		const { name, age, weight, breed, gender, adoptedAt, species } = req.query;
+		const queryObject = {};
 
-	if (name) {
-		queryObject.name = { $regex: name, $options: "i" };
-	}
+		if (name) {
+			queryObject.name = { $regex: name, $options: "i" };
+		}
 
-	if (age) {
-		const [min, max] = age.split("-");
-		queryObject.age = { $gte: min, $lte: max };
-	}
+		if (age) {
+			const [min, max] = age.split("-");
+			queryObject.age = { $gte: min, $lte: max };
+		}
 
-	if (weight) {
-		const [min, max] = weight.split("-");
-		queryObject.weight = { $gte: min, $lte: max };
-	}
-	if (breed) {
-		queryObject.breed = breed;
-	}
-	if (gender) {
-		queryObject.gender = gender;
-	}
-	if (adoptedAt) {
-		queryObject.adoptedAt = { $gte: adoptedAt };
-	}
-	if (species) {
-		queryObject.species = species;
+		if (weight) {
+			const [min, max] = weight.split("-");
+			queryObject.weight = { $gte: min, $lte: max };
+		}
+		if (breed) {
+			queryObject.breed = breed;
+		}
+		if (gender) {
+			queryObject.gender = gender;
+		}
+		if (adoptedAt) {
+			queryObject.adoptedAt = { $gte: adoptedAt };
+		}
+		if (species) {
+			queryObject.species = species;
+		}
 	}
 
 	const animals = await Animal.find(queryObject);
@@ -51,7 +55,6 @@ const getAnimal = async (req, res) => {
 };
 
 const createAnimal = async (req, res) => {
-	console.log(req.body);
 	const {
 		name,
 		age,
@@ -63,8 +66,6 @@ const createAnimal = async (req, res) => {
 		adoptedAt,
 		image,
 	} = req.body.data;
-
-	console.log(req.body);
 
 	if (!name || !age || !species || !weight || !gender || !image) {
 		await cloudinary.uploader.destroy(req.body.image_id); // delete image from cloudinary if error occurs
